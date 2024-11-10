@@ -56,6 +56,7 @@ public class TaskManager {
     // Обновление статуса подзадачи и пересчет статуса эпика
     public void updateSubtaskStatus(int id, TaskStatus status) {
         Subtask subtask = subtasks.get(id);
+
         if (subtask != null) {
             subtask.setStatus(status);
             updateEpicStatus(subtask.getEpicId());
@@ -65,29 +66,36 @@ public class TaskManager {
     // Обновление статуса эпика в зависимости от статусов его подзадач
     private void updateEpicStatus(int epicId) {
         Epic epic = (Epic) tasks.get(epicId);
-        if (epic != null) {
-            ArrayList<Integer> subtaskIds = epic.getSubtasks();
-            boolean allNew = true;
-            boolean allDone = true;
 
-            for (int subtaskId : subtaskIds) {
-                TaskStatus status = subtasks.get(subtaskId).getStatus();
-                if (status != TaskStatus.NEW) {
-                    allNew = false;
-                }
-                if (status != TaskStatus.DONE) {
-                    allDone = false;
-                }
+        if (epic == null) return;
+
+        if (epic.getSubtasks().isEmpty()) {
+            epic.setStatus(TaskStatus.NEW);
+            return;
+        }
+
+        ArrayList<Integer> subtaskIds = epic.getSubtasks();
+        boolean allNew = true;
+        boolean allDone = true;
+
+        for (int subtaskId : subtaskIds) {
+            TaskStatus status = subtasks.get(subtaskId).getStatus();
+            if (status != TaskStatus.NEW) {
+                allNew = false;
             }
-
-            if (allDone) {
-                epic.setStatus(TaskStatus.DONE);
-            } else if (allNew) {
-                epic.setStatus(TaskStatus.NEW);
-            } else {
-                epic.setStatus(TaskStatus.IN_PROGRESS);
+            if (status != TaskStatus.DONE) {
+                allDone = false;
             }
         }
+
+        if (allDone) {
+            epic.setStatus(TaskStatus.DONE);
+        } else if (allNew) {
+            epic.setStatus(TaskStatus.NEW);
+        } else {
+            epic.setStatus(TaskStatus.IN_PROGRESS);
+        }
+
     }
 
     // Метод для получения списка всех задач
