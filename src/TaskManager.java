@@ -46,10 +46,35 @@ public class TaskManager {
     }
 
     // Обновление статуса задачи
-    public void updateTaskStatus(int id, TaskStatus status) {
-        Task task = tasks.get(id);
-        if (task != null) {
-            task.setStatus(status);
+    public void updateTask(Task updatedTask) {
+        Task existingTask = tasks.get(updatedTask.getId());
+        if (existingTask != null && !(existingTask instanceof Epic)) {
+            tasks.put(updatedTask.getId(), updatedTask);  // Обновление задачи
+        }
+    }
+
+    // Обновление статуса подзадачи
+    public void updateSubtask(Subtask updatedSubtask) {
+        Subtask existingSubtask = subtasks.get(updatedSubtask.getId());
+        if (existingSubtask != null) {
+            subtasks.put(updatedSubtask.getId(), updatedSubtask);  // Обновление подзадачи
+
+            // Обновление статуса эпика
+            Epic epic = (Epic) tasks.get(updatedSubtask.getEpicId());
+            if (epic != null) {
+                updateEpicStatus(epic.getId());
+            }
+        }
+    }
+
+    // Обновление статуса эпика
+    public void updateEpic(Epic updatedEpic) {
+        Epic existingEpic = (Epic) tasks.get(updatedEpic.getId());
+        if (existingEpic != null) {
+            tasks.put(updatedEpic.getId(), updatedEpic);  // Обновление эпика
+
+            // Пересчитываем статус эпика на основе подзадач
+            updateEpicStatus(updatedEpic.getId());
         }
     }
 
