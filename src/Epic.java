@@ -1,59 +1,62 @@
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.HashMap;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> subtasks;
+    private ArrayList<Integer> subtasksId;
 
     public Epic(String name, String description) {
         super(name, description);
-        this.subtasks = new ArrayList<>();
+        this.subtasksId = new ArrayList<>();
     }
 
-    public void addSubtask(Subtask subtask) {
-        subtasks.add(subtask);
+    public void addSubtask(int subtaskId) {
+        subtasksId.add(subtaskId);
     }
 
-    public ArrayList<Subtask> getSubtasks() {
-        return subtasks;
+    public ArrayList<Integer> getSubtasks() {
+        return new ArrayList<>(subtasksId);
     }
 
-    public void removeSubtask(Subtask subtask) {
-        subtasks.remove(subtask);
+    public void removeSubtask(int subtaskId) {
+        subtasksId.remove(Integer.valueOf(subtaskId));
     }
 
-    public void updateEpicStatus() {
+    // Метод обновления статуса эпика на основе статусов его подзадач
+    public void updateEpicStatus(HashMap<Integer, Subtask> subtasks) {
+        if (subtasksId.isEmpty()) {
+            setStatus(TaskStatus.NEW);
+            return;
+        }
+
         boolean allDone = true;
-        boolean allNew = true;
+        boolean anyInProgress = false;
 
-        for (Subtask subtask : subtasks) {
-            if (subtask.getStatus() != TaskStatus.DONE) {
-                allDone = false;
-            }
-            if (subtask.getStatus() != TaskStatus.NEW) {
-                allNew = false;
+        for (Integer subtaskId : subtasksId) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask != null) {
+                if (subtask.getStatus() == TaskStatus.IN_PROGRESS) {
+                    anyInProgress = true;
+                }
+                if (subtask.getStatus() != TaskStatus.DONE) {
+                    allDone = false;
+                }
             }
         }
 
         if (allDone) {
-            this.setStatus(TaskStatus.DONE);
-        } else if (allNew) {
-            this.setStatus(TaskStatus.NEW);
+            setStatus(TaskStatus.DONE);
+        } else if (anyInProgress) {
+            setStatus(TaskStatus.IN_PROGRESS);
         } else {
-            this.setStatus(TaskStatus.IN_PROGRESS);
+            setStatus(TaskStatus.NEW);
         }
     }
 
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Epic epic = (Epic) o;
-        return getId() == epic.getId();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
+    public String toString() {
+        return "Задача: "+ getName() +
+                ", описание: " + getDescription() +
+                ", статус: " + getStatus() +
+                " количество подзадач:" + subtasksId.size();
     }
 }
