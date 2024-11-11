@@ -180,6 +180,7 @@ public class TaskManager {
         return epicSubtasks;
     }
 
+    // Метод для получения статуса задачи по ID, больше для удобства вывода
     public String getTaskStatusById(int id) {
         if (tasks.containsKey(id)) {
             return tasks.get(id).getStatus().toString();
