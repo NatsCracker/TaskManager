@@ -27,18 +27,18 @@ public class Main {
         // Печать всех задач
         System.out.println("Все задачи:");
         for (Task task : manager.getAllTasks()) {
-            System.out.println(" - " + task.getName() + ": " + task.getDescription() + " [Статус: " + task.getStatus() + "]");
+            System.out.println(" - " + task.getName() + ": " + task.getDescription() + " [Статус: " + manager.getTaskStatusById(task.getId()) + "]");
         }
 
         // Печать подзадач для каждого эпика
         System.out.println("\nПодзадачи для эпика 'Организация вечеринки':");
         for (Subtask subtask : manager.getSubtasksForEpic(epic1.getId())) {
-            System.out.println(" - " + subtask.getName() + ": " + subtask.getDescription() + " [Статус: " + subtask.getStatus() + "]");
+            System.out.println(" - " + subtask.getName() + ": " + subtask.getDescription() + " [Статус: " + manager.getTaskStatusById(subtask.getId()) + "]");
         }
 
         System.out.println("\nПодзадачи для эпика 'Переезд':");
         for (Subtask subtask : manager.getSubtasksForEpic(epic2.getId())) {
-            System.out.println(" - " + subtask.getName() + ": " + subtask.getDescription() + " [Статус: " + subtask.getStatus() + "]");
+            System.out.println(" - " + subtask.getName() + ": " + subtask.getDescription() + " [Статус: " + manager.getTaskStatusById(subtask.getId()) + "]");
         }
 
         // Изменение статусов задач и подзадач
@@ -53,14 +53,14 @@ public class Main {
 
         // Проверка статусов после изменений
         System.out.println("\nСтатусы после изменений:");
-        System.out.println("Задача 'Уборка' - [Статус: " + manager.getTaskById(task1.getId()).getStatus() + "]");
-        System.out.println("Подзадача 'Купить торт' - [Статус: " + manager.getSubtaskById(subtask1.getId()).getStatus() + "]");
-        System.out.println("Эпик 'Организация вечеринки' - [Статус: " + manager.getEpicById(epic1.getId()).getStatus() + "]");
+        System.out.println("Задача 'Уборка' - [Статус: " + manager.getTaskStatusById(task1.getId()) + "]");
+        System.out.println("Подзадача 'Купить торт' - [Статус: " + manager.getTaskStatusById(subtask1.getId()) + "]");
+        System.out.println("Эпик 'Организация вечеринки' - [Статус: " + manager.getTaskStatusById(epic1.getId()) + "]");
 
         // Удаление подзадачи по ID и пересчет статуса эпика
         manager.deleteSubtaskById(subtask2.getId());
         System.out.println("\nПосле удаления подзадачи 'Пригласить друзей':");
-        System.out.println("Эпик 'Организация вечеринки' - [Статус: " + manager.getEpicById(epic1.getId()).getStatus() + "]");
+        System.out.println("Эпик 'Организация вечеринки' - [Статус: " + manager.getTaskStatusById(epic1.getId()) + "]");
 
         // Удаление задачи и эпика
         manager.deleteTaskById(task2.getId());
@@ -69,7 +69,7 @@ public class Main {
         // Печать задач после удаления
         System.out.println("\nСписок задач после удаления:");
         for (Task task : manager.getAllTasks()) {
-            System.out.println(" - " + task.getName() + ": " + task.getDescription() + " [Статус: " + task.getStatus() + "]");
+            System.out.println(" - " + task.getName() + ": " + task.getDescription() + " [Статус: " + manager.getTaskStatusById(task.getId()) + "]");
         }
 
         // Удаление всех задач и подзадач
@@ -80,4 +80,3 @@ public class Main {
         }
     }
 }
-

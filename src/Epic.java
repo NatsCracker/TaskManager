@@ -1,8 +1,8 @@
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 public class Epic extends Task {
-    private ArrayList<Integer> subtasksId;
+    private List<Integer> subtasksId;
 
     public Epic(String name, String description) {
         super(name, description);
@@ -13,14 +13,13 @@ public class Epic extends Task {
         subtasksId.add(subtaskId);
     }
 
-    public ArrayList<Integer> getSubtasks() {
+    public List<Integer> getSubtasks() {
         return new ArrayList<>(subtasksId);
     }
 
     public void removeSubtask(int subtaskId) {
         subtasksId.remove(Integer.valueOf(subtaskId));
     }
-
 
     @Override
     public String toString() {

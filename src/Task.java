@@ -2,8 +2,8 @@ import java.util.Objects;
 
 public class Task {
     private int id;
-    private final String name;
-    private final String description;
+    private String name;
+    private String description;
     private TaskStatus status;
 
     public Task(String name, String description) {
@@ -24,8 +24,16 @@ public class Task {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public TaskStatus getStatus() {
