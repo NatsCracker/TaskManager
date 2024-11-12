@@ -131,7 +131,6 @@ public class TaskManager {
     public void deleteEpicById(int id) {
         Epic epic = epics.remove(id);
         if (epic != null) {
-            tasks.remove(id);
             for (int subtaskId : epic.getSubtasks()) {
                 subtasks.remove(subtaskId);
             }
@@ -160,6 +159,7 @@ public class TaskManager {
         return new ArrayList<>(epics.values());
     }
 
+    // Метод получения всех подзадач
     public List<Subtask> getAllSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
