@@ -27,7 +27,19 @@ public class Main {
         // Печать всех задач
         System.out.println("Все задачи:");
         for (Task task : manager.getAllTasks()) {
-            System.out.println(" - " + task.getName() + ": " + task.getDescription() + " [Статус: " + manager.getTaskStatusById(task.getId()) + "]");
+            System.out.println(" - " + task.getId() + ": " + task.getName() + ": " + task.getDescription() + " [Статус: " + manager.getTaskStatusById(task.getId()) + "]");
+        }
+
+        // Печать всех эпиков
+        System.out.println("\nВсе эпики:");
+        for (Epic epic : manager.getAllEpics()) {
+            System.out.println(" - " + epic.getId() + ": " + epic.getName() + ": " + epic.getDescription() + " [Статус: " + manager.getTaskStatusById(epic.getId()) + "]");
+        }
+
+        //Печать всех подзадач
+        System.out.println("\nВсе подзадачи:");
+        for (Subtask subtask : manager.getAllSubtasks()) {
+            System.out.println(" - " + subtask.getId() + ": " + subtask.getName() + ": " + subtask.getDescription() + " [Статус: " + manager.getTaskStatusById(subtask.getId()) + "]");
         }
 
         // Печать подзадач для каждого эпика
@@ -77,6 +89,12 @@ public class Main {
         System.out.println("\nПосле удаления всех задач и подзадач:");
         if (manager.getAllTasks().isEmpty()) {
             System.out.println("Нет задач.");
+        }
+        if (manager.getAllSubtasks().isEmpty()) {
+        System.out.println("Нет подзадач.");
+        }
+        if (manager.getAllEpics().isEmpty()) {
+        System.out.println("Нет эпиков.");
         }
     }
 }

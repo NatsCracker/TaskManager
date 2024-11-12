@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TaskManager {
     private int taskIdCounter = 1;
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private Map<Integer, Task> tasks = new HashMap<>();
+    private Map<Integer, Epic> epics = new HashMap<>();
+    private Map<Integer, Subtask> subtasks = new HashMap<>();
 
     // Метод для создания обычной задачи
     public void createTask(Task task) {
@@ -17,7 +18,6 @@ public class TaskManager {
     // Метод для создания эпика
     public void createEpic(Epic epic) {
         epic.setId(taskIdCounter++);
-        tasks.put(epic.getId(), epic);
         epics.put(epic.getId(), epic);
     }
 
@@ -84,7 +84,6 @@ public class TaskManager {
             existingEpic.setDescription(updatedEpic.getDescription());
             epics.put(updatedEpic.getId(), updatedEpic);
         }
-        updateEpicStatus(updatedEpic.getId());
     }
 
     // Обновление статуса эпика в зависимости от статусов его подзадач
@@ -151,13 +150,6 @@ public class TaskManager {
         }
     }
 
-    // Удаление всех задач, эпиков и подзадач
-    public void deleteAllTasksAndSubtasks() {
-        tasks.clear();
-        epics.clear();
-        subtasks.clear();
-    }
-
     // Метод для получения списка всех задач
     public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
@@ -166,6 +158,10 @@ public class TaskManager {
     // Метод для получения всех эпиков
     public List<Epic> getAllEpics() {
         return new ArrayList<>(epics.values());
+    }
+
+    public List<Subtask> getAllSubtasks() {
+        return new ArrayList<>(subtasks.values());
     }
 
     // Метод для получения списка всех подзадач для эпика
@@ -191,6 +187,36 @@ public class TaskManager {
         } else {
             return "Удалена";
         }
+    }
+
+    // Метод для удаления всех задач
+    public void deleteAllTasks() {
+        tasks.clear();
+    }
+
+    // Метод для удаления всех эпиков и подзадач
+    public void deleteAllEpics() {
+        for (Epic epic : epics.values()) {
+            for (int subtaskId : epic.getSubtasks()) {
+                subtasks.remove(subtaskId);
+            }
+        }
+        epics.clear();
+    }
+
+    // Метод для удаления всех подзадач
+    public void deleteAllSubtasks() {
+        for (Epic epic : epics.values()) {
+            epic.getSubtasks().clear();
+        }
+        subtasks.clear();
+    }
+
+    // Метод для удаления всех задач, эпиков и подзадач
+    public void deleteAllTasksAndSubtasks() {
+        deleteAllTasks();
+        deleteAllEpics();
+        deleteAllSubtasks();
     }
 }
 
