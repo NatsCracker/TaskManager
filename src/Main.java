@@ -85,14 +85,16 @@ public class Main {
         }
 
         // Удаление всех задач и подзадач
-        manager.deleteAllTasksAndSubtasks();
         System.out.println("\nПосле удаления всех задач и подзадач:");
+        manager.deleteAllTasks();
         if (manager.getAllTasks().isEmpty()) {
             System.out.println("Нет задач.");
         }
+        manager.deleteAllSubtasks();
         if (manager.getAllSubtasks().isEmpty()) {
         System.out.println("Нет подзадач.");
         }
+        manager.deleteAllEpics();
         if (manager.getAllEpics().isEmpty()) {
         System.out.println("Нет эпиков.");
         }

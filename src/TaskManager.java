@@ -196,27 +196,13 @@ public class TaskManager {
 
     // Метод для удаления всех эпиков и подзадач
     public void deleteAllEpics() {
-        for (Epic epic : epics.values()) {
-            for (int subtaskId : epic.getSubtasks()) {
-                subtasks.remove(subtaskId);
-            }
-        }
+        deleteAllSubtasks();
         epics.clear();
     }
 
     // Метод для удаления всех подзадач
     public void deleteAllSubtasks() {
-        for (Epic epic : epics.values()) {
-            epic.getSubtasks().clear();
-        }
         subtasks.clear();
-    }
-
-    // Метод для удаления всех задач, эпиков и подзадач
-    public void deleteAllTasksAndSubtasks() {
-        deleteAllTasks();
-        deleteAllEpics();
-        deleteAllSubtasks();
     }
 }
 
