@@ -34,7 +34,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (subtask.getEpicId() == subtask.getId()) {
-            System.out.println("Ошибка: подзадача не может ссылаться на эпик, являющийся её самой.");
+            System.out.println("Ошибка: подзадача не может ссылаться на эпик, являющийся самим собой.");
             return;
         }
 
