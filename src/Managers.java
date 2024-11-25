@@ -1,4 +1,4 @@
-public final class Managers<T extends TaskManager> {
+public final class Managers {
 
     private Managers() {}
 
