@@ -1,3 +1,9 @@
+package main.service;
+
+import main.model.Epic;
+import main.model.Subtask;
+import main.model.Task;
+
 import java.util.List;
 
 public interface TaskManager {
@@ -28,9 +34,6 @@ public interface TaskManager {
     // Метод обнавления статуса эпика
     void updateEpic(Epic updatedEpic);
 
-    // Обновление статуса эпика в зависимости от статусов его подзадач
-    void updateEpicStatus(int epicId);
-
     // Удаление задачи по ID
     void deleteTaskById(int id);
 
@@ -51,9 +54,6 @@ public interface TaskManager {
 
     // Метод для получения списка всех подзадач для эпика
     List<Subtask> getSubtasksForEpic(int epicId);
-
-    // Метод для получения статуса задачи по ID, больше для удобства вывода
-    String getTaskStatusById(int id);
 
     // Метод для удаления всех задач
     void deleteAllTasks();

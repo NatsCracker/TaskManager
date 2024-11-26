@@ -1,3 +1,5 @@
+package main.model;
+
 public class Subtask extends Task {
     private final int epicId;
 
@@ -6,6 +8,7 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
+    // Метод для получения id эпика
     public int getEpicId() {
         return epicId;
     }

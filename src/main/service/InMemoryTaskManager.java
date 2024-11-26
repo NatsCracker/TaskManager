@@ -1,3 +1,11 @@
+package main.service;
+
+import main.model.Epic;
+import main.model.Subtask;
+import main.model.Task;
+import main.model.TaskStatus;
+import main.util.Managers;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -40,9 +48,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         subtask.setId(taskIdCounter++);
         subtasks.put(subtask.getId(), subtask);
-
         epic.addSubtask(subtask.getId());
-
         updateEpicStatus(epic.getId());
     }
 
@@ -58,14 +64,18 @@ public class InMemoryTaskManager implements TaskManager {
     // Метод для получения эпика по ID
     @Override
     public Epic getEpicById(int id) {
-        history.add(epics.get(id));
+        if (epics.get(id) != null) {
+            history.add(epics.get(id));
+        }
         return epics.get(id);
     }
 
     // Метод для получения подзадачи по ID
     @Override
     public Subtask getSubtaskById(int id) {
-        history.add(subtasks.get(id));
+        if (subtasks.get(id) != null) {
+            history.add(subtasks.get(id));
+        }
         return subtasks.get(id);
     }
 
@@ -109,7 +119,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // Обновление статуса эпика в зависимости от статусов его подзадач
-    @Override
     public void updateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
         if (epic == null) return;
@@ -207,7 +216,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // Метод для получения статуса задачи по ID, больше для удобства вывода
-    @Override
     public String getTaskStatusById(int id) {
         if (tasks.containsKey(id)) {
             return tasks.get(id).getStatus().toString();
@@ -236,6 +244,9 @@ public class InMemoryTaskManager implements TaskManager {
     // Метод для удаления всех подзадач
     @Override
     public void deleteAllSubtasks() {
+        for(Epic epic : epics.values()) {
+            epic.removeAllSubtasks();
+        }
         subtasks.clear();
     }
 

@@ -1,3 +1,5 @@
+package main.model;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,11 @@ public class Epic extends Task {
     // Метод для удаления подзадачи
     public void removeSubtask(int subtaskId) {
         subtasksId.remove(Integer.valueOf(subtaskId));
+    }
+
+    // Метод для удаления всех подзадач
+    public void removeAllSubtasks() {
+        subtasksId.clear();
     }
 
     @Override

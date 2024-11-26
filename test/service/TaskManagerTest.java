@@ -1,3 +1,11 @@
+package service;
+
+import main.model.Epic;
+import main.model.Subtask;
+import main.model.Task;
+import main.service.HistoryManager;
+import main.service.TaskManager;
+import main.util.Managers;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -6,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TaskManagerTest {
 
-    // Тест 1: Проверяет, что два объекта Task считаются равными, если у них одинаковый ID
+    // Тест 1: Проверяет, что два объекта main.java.model.Task считаются равными, если у них одинаковый ID
     @Test
     void testTaskEqualityById() {
         Task task1 = new Task("Задача 1", "Описание 1");
@@ -16,7 +24,8 @@ public class TaskManagerTest {
         assertEquals(task1, task2, "Задачи с одинаковыми ID должны быть равны");
     }
 
-    // Тест 2: Проверяет, что наследники класса Task (например, Epic, Subtask) считаются равными, если у них одинаковый ID
+    // Тест 2: Проверяет, что наследники класса main.java.model.Task
+    // (например, main.java.model.Epic, main.java.model.Subtask) считаются равными, если у них одинаковый ID
     @Test
     void testTaskSubclassesEqualityById() {
         Epic epic1 = new Epic("Эпик 1", "Описание эпика 1");
@@ -32,7 +41,7 @@ public class TaskManagerTest {
         assertEquals(subtask1, subtask2, "Подзадачи с одинаковыми ID должны быть равны");
     }
 
-    // Тест 3: Проверяет, что объект Epic не может добавить самого себя в качестве подзадачи
+    // Тест 3: Проверяет, что объект main.java.model.Epic не может добавить самого себя в качестве подзадачи
     @Test
     void testEpicCannotAddItselfAsSubtask() {
         TaskManager manager = Managers.getDefault();
@@ -64,21 +73,23 @@ public class TaskManagerTest {
         assertNotEquals(subtask.getId(), epic.getId(), "Подзадача не может быть своим собственным эпиком");
     }
 
-    // Тест 5: Проверяет, что утилитарный класс возвращает проинициализированный и готовый к работе экземпляр TaskManager
+    // Тест 5: Проверяет, что утилитарный класс возвращает проинициализированный и готовый к работе экземпляр
+    // main.java.service.TaskManager
     @Test
     void testUtilityClassReturnsInitializedTaskManager() {
         TaskManager taskManager = Managers.getDefault();
-        assertNotNull(taskManager, "TaskManager должен быть инициализирован");
+        assertNotNull(taskManager, "main.java.service.TaskManager должен быть инициализирован");
     }
 
-    // Тест 6: Проверяет, что утилитарный класс возвращает проинициализированный и готовый к работе экземпляр HistoryManager
+    // Тест 6: Проверяет, что утилитарный класс возвращает проинициализированный и готовый к работе экземпляр
+    // main.java.service.HistoryManager
     @Test
     void testUtilityClassReturnsInitializedHistoryManager() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        assertNotNull(historyManager, "HistoryManager должен быть инициализирован");
+        assertNotNull(historyManager, "main.java.service.HistoryManager должен быть инициализирован");
     }
 
-    // Тест 7: Проверяет, что InMemoryTaskManager добавляет задачи разных типов и может найти их по ID
+    // Тест 7: Проверяет, что main.java.service.InMemoryTaskManager добавляет задачи разных типов и может найти их по ID
     @Test
     void testInMemoryTaskManagerAddAndFindTasks() {
         TaskManager manager = Managers.getDefault();
@@ -119,7 +130,7 @@ public class TaskManagerTest {
         assertEquals(task.getDescription(), retrievedTask.getDescription(), "Описание задачи должно оставаться неизменным");
     }
 
-    // Тест 10: Проверяет, что HistoryManager сохраняет все версии задачи при добавлении в историю
+    // Тест 10: Проверяет, что main.java.service.HistoryManager сохраняет все версии задачи при добавлении в историю
     @Test
     void testHistoryManagerPreservesTaskVersions() {
         HistoryManager historyManager = Managers.getDefaultHistory();
@@ -129,7 +140,23 @@ public class TaskManagerTest {
         Task updatedTask = new Task("Обновленная задача", "Обновленное описание");
         updatedTask.setId(1);
         historyManager.add(updatedTask);
-        assertEquals(2, historyManager.getHistory().size(), "HistoryManager должен сохранять обе версии задачи");
+        assertEquals(2, historyManager.getHistory().size(), "main.java.service.HistoryManager " +
+                "должен сохранять обе версии задачи");
+    }
+
+    // Тест 11: Проверяет, что все подзадачи удаляются при удалении всех подзадач
+    @Test
+    void testDeleteAllSybtasks() {
+        TaskManager manager = Managers.getDefault();
+        Epic epic = new Epic("Эпик", "Описание");
+        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 1);
+
+        manager.createEpic(epic);
+        manager.createSubtask(subtask);
+        manager.deleteAllSubtasks();
+
+        assertEquals(0, epic.getSubtasks().size(), "Эпик должен содержать пустой список подзадач" +
+                " после удаления всех подзадач");
     }
 }
 
