@@ -9,4 +9,6 @@ public interface HistoryManager {
     void add(Task task);
     // Метод для получения истории
     List<Task> getHistory();
+    // Метод для удаления из истории
+    void remove(int id);
 }
