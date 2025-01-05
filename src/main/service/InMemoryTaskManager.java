@@ -235,7 +235,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Метод для удаления всех задач
     @Override
     public void deleteAllTasks() {
-        for(Task task : tasks.values()) {
+        for (Task task : tasks.values()) {
             history.remove(task.getId());
         }
         tasks.clear();
@@ -245,7 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllEpics() {
         deleteAllSubtasks();
-        for(Epic epic : epics.values()) {
+        for (Epic epic : epics.values()) {
             history.remove(epic.getId());
         }
         epics.clear();
@@ -254,10 +254,10 @@ public class InMemoryTaskManager implements TaskManager {
     // Метод для удаления всех подзадач
     @Override
     public void deleteAllSubtasks() {
-        for(Subtask subtask : subtasks.values()) {
+        for (Subtask subtask : subtasks.values()) {
             history.remove(subtask.getId());
         }
-        for(Epic epic : epics.values()) {
+        for (Epic epic : epics.values()) {
             epic.removeAllSubtasks();
         }
         subtasks.clear();
