@@ -50,33 +50,41 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(subtask.getId(), subtask);
         epic.addSubtask(subtask.getId());
         updateEpicStatus(epic.getId());
+
     }
 
     // Метод для получения задачи по ID
     @Override
     public Task getTaskById(int id) {
+
         if (tasks.get(id) != null) {
             history.add(tasks.get(id));
         }
         return tasks.get(id);
+
     }
 
     // Метод для получения эпика по ID
     @Override
     public Epic getEpicById(int id) {
+
         if (epics.get(id) != null) {
             history.add(epics.get(id));
         }
         return epics.get(id);
+
     }
 
     // Метод для получения подзадачи по ID
     @Override
     public Subtask getSubtaskById(int id) {
+
         if (subtasks.get(id) != null) {
             history.add(subtasks.get(id));
         }
+
         return subtasks.get(id);
+
     }
 
     // Обновление статуса задачи
