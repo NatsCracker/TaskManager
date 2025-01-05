@@ -2,8 +2,6 @@ package main;
 
 import main.model.Epic;
 import main.model.Subtask;
-import main.model.Task;
-import main.service.HistoryManager;
 import main.service.TaskManager;
 import main.util.Managers;
 
