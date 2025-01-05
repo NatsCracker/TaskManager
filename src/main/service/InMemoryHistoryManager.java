@@ -48,21 +48,21 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
         Node node = historyMap.get(id);
-        if (node != null){
+        if (node != null) {
             removeNode(node);
             historyMap.remove(id);
         }
     }
 
     // Метод удаления ноды
-    private void removeNode(Node node){
-        if (node.prev != null){
+    private void removeNode(Node node) {
+        if (node.prev != null) {
             node.prev.next = node.next;
         } else {
             head = node.next;
         }
 
-        if (node.next != null){
+        if (node.next != null) {
             node.next.prev = node.prev;
         } else {
             tail = node.prev;
@@ -70,18 +70,18 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     // Метод для получения ноды по id
-    private Node getNode(int id){
+    private Node getNode(int id) {
         return historyMap.get(id);
     }
 
-     private class Node {
+    private class Node {
         private Task task;
         private Node next;
         private Node prev;
 
-        Node(Task task){
+        Node(Task task) {
             this.task = task;
         }
-     }
+    }
 
 }
