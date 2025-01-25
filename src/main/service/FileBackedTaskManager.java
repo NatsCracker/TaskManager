@@ -21,6 +21,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
+    // Метод для сохранения данных в файл
     private void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writer.write("id,type,name,status,description,epic");
@@ -36,7 +37,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 writer.newLine();
             }
             
-            // Добавляем сохранение истории
             writer.newLine();
             writer.write("History");
             writer.newLine();
@@ -49,6 +49,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // Метод для загрузки данных из файла
     public static FileBackedTaskManager loadFromFile(File file) {
         if (file == null) {
             throw new IllegalArgumentException("Файл не может быть null");
@@ -76,6 +77,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return manager;
     }
 
+    // Метод для чтения задач из файла
     private static List<Task> readTasks(BufferedReader reader) throws IOException {
         List<Task> tasks = new ArrayList<>();
         String line;
@@ -85,6 +87,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return tasks;
     }
 
+    // Метод для создания задач
     private static void createTasks(FileBackedTaskManager manager, List<Task> tasks) {
         // Сначала создаём обычные задачи и эпики
         for (Task task : tasks) {
@@ -103,6 +106,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // Метод для чтения истории
     private static void readHistory(BufferedReader reader, FileBackedTaskManager manager) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
@@ -137,6 +141,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         );
     }
 
+    // Метод для преобразования из строки в задачу
     private static Task fromString(String value) {
         String[] fields = value.split(",");
         if (fields.length < 5) {
@@ -187,6 +192,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
+    // Метод для получения типа задачи
     private static TaskType getTypeTask(Task task) {
         if (task instanceof Subtask) {
             return TaskType.SUBTASK;
