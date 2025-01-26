@@ -26,17 +26,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writer.write("id,type,name,status,description,epic");
             writer.newLine();
-            
             List<Task> allTasks = new ArrayList<>();
             allTasks.addAll(getAllTasks());
             allTasks.addAll(getAllEpics());
             allTasks.addAll(getAllSubtasks());
-            
             for (Task task : allTasks) {
                 writer.write(toString(task));
                 writer.newLine();
             }
-            
             writer.newLine();
             writer.write("History");
             writer.newLine();
@@ -54,22 +51,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (file == null) {
             throw new IllegalArgumentException("Файл не может быть null");
         }
-        
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
         if (!file.exists()) {
             return manager;
         }
-
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String header = reader.readLine();
             if (header == null || header.isEmpty()) {
                 return manager;
             }
-
             List<Task> tasks = readTasks(reader);
             createTasks(manager, tasks);
             readHistory(reader, manager);
-            
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка загрузки данных из файла: " + file.getPath(), e);
         }
@@ -95,7 +88,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 manager.createTask(task);
             }
         }
-        
         for (Task task : tasks) {
             if (task instanceof Subtask) {
                 manager.createSubtask((Subtask) task);
