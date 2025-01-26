@@ -61,7 +61,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            // Читаем задачи
             String header = reader.readLine();
             if (header == null || header.isEmpty()) {
                 return manager;
@@ -89,7 +88,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для создания задач
     private static void createTasks(FileBackedTaskManager manager, List<Task> tasks) {
-        // Сначала создаём обычные задачи и эпики
         for (Task task : tasks) {
             if (task instanceof Epic) {
                 manager.createEpic((Epic) task);
@@ -98,7 +96,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         }
         
-        // Затем создаём подзадачи
         for (Task task : tasks) {
             if (task instanceof Subtask) {
                 manager.createSubtask((Subtask) task);
@@ -130,6 +127,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // Метод для преобразования задачи в строку
     private static String toString(Task task) {
         return String.format("%d,%s,%s,%s,%s,%s",
                 task.getId(),
@@ -174,18 +172,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return task;
     }
 
+    // Метод для создания задачи
     @Override
     public void createTask(Task task) {
         super.createTask(task);
         save();
     }
 
+    // Метод для создания эпика
     @Override
     public void createEpic(Epic epic) {
         super.createEpic(epic);
         save();
     }
 
+    // Метод для создания подзадачи
     @Override
     public void createSubtask(Subtask subtask) {
         super.createSubtask(subtask);
