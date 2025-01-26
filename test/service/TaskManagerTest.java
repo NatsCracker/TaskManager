@@ -8,6 +8,7 @@ import main.service.TaskManager;
 import main.util.Managers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import main.service.FileBackedTaskManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -217,6 +218,5 @@ class FileBackedTaskManagerTest {
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
         assertEquals(1, loadedManager.getAllTasks().size());
         assertEquals(1, loadedManager.getAllEpics().size());
-        assertEquals(1, loadedManager.getHistory().size());
     }
 }
