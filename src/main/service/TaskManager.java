@@ -64,5 +64,6 @@ public interface TaskManager {
     // Метод для удаления всех подзадач
     void deleteAllSubtasks();
 
+    // Метод для получения истории просмотров задач
     List<Task> getHistory();
 }

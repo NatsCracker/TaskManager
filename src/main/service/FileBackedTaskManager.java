@@ -176,22 +176,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для удаления задачи
     @Override
-    public void deleteTask(int id) {
-        super.deleteTask(id);
+    public void deleteTaskById(int id) {
+        super.deleteTaskById(id);
         save();
     }
 
     // Метод для удаления эпика
     @Override
-    public void deleteEpic(int id) {
-        super.deleteEpic(id);
+    public void deleteEpicById(int id) {
+        super.deleteEpicById(id);
         save();
     }
 
     // Метод для удаления подзадачи
     @Override
-    public void deleteSubtask(int id) {
-        super.deleteSubtask(id);
+    public void deleteSubtaskById(int id) {
+        super.deleteSubtaskById(id);
         save();
     }
 
