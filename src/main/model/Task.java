@@ -76,12 +76,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s", 
+        return String.format("%d,%s,%s,%s,%s",
             id,
             TaskType.TASK,
             name,
             status,
-            description
-        );
+            description);
     }
 }
