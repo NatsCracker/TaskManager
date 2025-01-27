@@ -31,7 +31,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             allTasks.addAll(getAllEpics());
             allTasks.addAll(getAllSubtasks());
             for (Task task : allTasks) {
-                writer.write(toString(task));
+                writer.write(task.toString());
                 writer.newLine();
             }
             writer.newLine();
@@ -60,9 +60,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (header == null || header.isEmpty()) {
                 return manager;
             }
-            List<Task> tasks = readTasks(reader);
-            createTasks(manager, tasks);
-            readHistory(reader, manager);
+            List<Task> tasks = manager.readTasks(reader);
+            manager.createTasks(tasks);
+            manager.readHistory(reader);
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка загрузки данных из файла: " + file.getPath(), e);
         }
@@ -70,7 +70,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     // Метод для чтения задач из файла
-    private static List<Task> readTasks(BufferedReader reader) throws IOException {
+    private List<Task> readTasks(BufferedReader reader) throws IOException {
         List<Task> tasks = new ArrayList<>();
         String line;
         while ((line = reader.readLine()) != null && !line.isBlank()) {
@@ -80,23 +80,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     // Метод для создания задач
-    private static void createTasks(FileBackedTaskManager manager, List<Task> tasks) {
+    private void createTasks(List<Task> tasks) {
         for (Task task : tasks) {
             if (task instanceof Epic) {
-                manager.createEpic((Epic) task);
+                createEpic((Epic) task);
             } else if (!(task instanceof Subtask)) {
-                manager.createTask(task);
+                createTask(task);
             }
         }
         for (Task task : tasks) {
             if (task instanceof Subtask) {
-                manager.createSubtask((Subtask) task);
+                createSubtask((Subtask) task);
             }
         }
     }
 
     // Метод для чтения истории
-    private static void readHistory(BufferedReader reader, FileBackedTaskManager manager) throws IOException {
+    private void readHistory(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.equals("History")) {
@@ -105,11 +105,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     String[] taskIds = historyLine.split(",");
                     for (String taskId : taskIds) {
                         int id = Integer.parseInt(taskId);
-                        Task task = manager.getTaskById(id);
+                        Task task = getTaskById(id);
                         if (task == null) {
-                            task = manager.getEpicById(id);
+                            task = getEpicById(id);
                             if (task == null) {
-                                task = manager.getSubtaskById(id);
+                                task = getSubtaskById(id);
                             }
                         }
                     }
@@ -117,18 +117,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 break;
             }
         }
-    }
-
-    // Метод для преобразования задачи в строку
-    private static String toString(Task task) {
-        return String.format("%d,%s,%s,%s,%s,%s",
-                task.getId(),
-                getTypeTask(task),
-                task.getName(),
-                task.getStatus(),
-                task.getDescription(),
-                (task instanceof Subtask subtask) ? subtask.getEpicId() : ""
-        );
     }
 
     // Метод для преобразования из строки в задачу
@@ -185,13 +173,72 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    // Метод для получения типа задачи
-    private static TaskType getTypeTask(Task task) {
-        if (task instanceof Subtask) {
-            return TaskType.SUBTASK;
-        } else if (task instanceof Epic) {
-            return TaskType.EPIC;
-        }
-        return TaskType.TASK;
+    // Метод для удаления задачи
+    @Override
+    public void deleteTask(int id) {
+        super.deleteTask(id);
+        save();
+    }
+
+    // Метод для удаления эпика
+    @Override
+    public void deleteEpic(int id) {
+        super.deleteEpic(id);
+        save();
+    }
+
+    // Метод для удаления подзадачи
+    @Override
+    public void deleteSubtask(int id) {
+        super.deleteSubtask(id);
+        save();
+    }
+
+    // Метод для удаления всех задач
+    @Override
+    public void deleteAllTasks() {
+        super.deleteAllTasks();
+        save();
+    }
+
+    // Метод для удаления всех эпиков
+    @Override
+    public void deleteAllEpics() {
+        super.deleteAllEpics();
+        save();
+    }
+
+    // Метод для удаления всех подзадач
+    @Override
+    public void deleteAllSubtasks() {
+        super.deleteAllSubtasks();
+        save();
+    }
+
+    // Метод для обновления задачи
+    @Override
+    public void updateTask(Task task) {
+        super.updateTask(task);
+        save();
+    }
+
+    // Метод для обновления эпика
+    @Override
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        save();
+    }
+
+    // Метод для обновления подзадачи
+    @Override
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        save();
+    }
+
+    // Метод для получения истории
+    @Override
+    public List<Task> getHistory() {
+        return super.getHistory();
     }
 }

@@ -3,15 +3,17 @@ package main.model;
 import java.util.Objects;
 
 public class Task {
-    private int id;
+    private final int id;
     private String name;
     private String description;
     private TaskStatus status;
+    private final TaskType type;
 
-    public Task(String name, String description) {
+    public Task(String name, String description, TaskType type) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
+        this.type = TaskType.TASK;
     }
 
     // Геттер id задачи
@@ -54,6 +56,11 @@ public class Task {
         this.status = status;
     }
 
+    // Геттер типа задачи
+    public TaskType getType() {
+        return type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,6 +76,12 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Задача: " + name + ", описание: " + description + ", статус: " + status;
+        return String.format("%d,%s,%s,%s,%s", 
+            id,
+            TaskType.TASK,
+            name,
+            status,
+            description
+        );
     }
 }
