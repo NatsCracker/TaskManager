@@ -3,17 +3,16 @@ package main.model;
 import java.util.Objects;
 
 public class Task {
-    private final int id;
+    protected int id;
     private String name;
     private String description;
     private TaskStatus status;
     private final TaskType type;
 
-    public Task(String name, String description, TaskType type) {
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
-        this.type = TaskType.TASK;
     }
 
     // Геттер id задачи
