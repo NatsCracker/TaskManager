@@ -156,12 +156,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case TASK:
                 task = new Task(name, description, duration, startTime);
                 break;
-<<<<<<< HEAD
-            case EPIC:
-                task = new Epic(name, description);
-                break;
-=======
->>>>>>> bb10cba (V3.7)
             case SUBTASK:
                 Subtask subtask = new Subtask(parts[2], parts[4], 
                         Integer.parseInt(parts[5]));
