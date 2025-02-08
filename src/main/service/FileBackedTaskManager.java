@@ -12,16 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Collection;
-import java.io.UncheckedIOException;
-import java.util.Arrays;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import main.model.Status;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -33,31 +29,39 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // Метод для сохранения данных в файл
     private void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write("id,type,name,status,description,epic,startTime,duration");
             writer.newLine();
             
-            // Объединяем все задачи в один стрим
-            Stream.of(getAllTasks(), getAllEpics(), getAllSubtasks())
-                .flatMap(Collection::stream)
-                .forEach(task -> {
-                    try {
-                        writer.write(task.toString());
-                        writer.newLine();
-                    } catch (IOException e) {
-                        throw new ManagerSaveException("Ошибка при записи задачи: " + task, e);
-                    }
-                });
+            List<Task> allTasks = new ArrayList<>();
+            allTasks.addAll(getAllTasks());
+            allTasks.addAll(getAllEpics());
+            allTasks.addAll(getAllSubtasks());
+            
+            for (Task task : allTasks) {
+                writer.write(String.format("%d,%s,%s,%s,%s,%s,%s,%d",
+                        task.getId(),
+                        task.getType(),
+                        task.getName(),
+                        task.getStatus(),
+                        task.getDescription(),
+                        task instanceof Subtask ? ((Subtask) task).getEpicId() : "",
+                        task.getStartTime() != null ? task.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "",
+                        task.getDuration() != null ? task.getDuration().toMinutes() : 0
+                ));
+                writer.newLine();
+            }
             
             writer.newLine();
             writer.write("History");
             writer.newLine();
             
-            // Записываем историю
-            String historyIds = history.getHistory().stream()
-                .map(task -> String.valueOf(task.getId()))
-                .collect(Collectors.joining(","));
-            writer.write(historyIds);
-            
+            List<Task> history = getHistory();
+            for (int i = 0; i < history.size(); i++) {
+                writer.write(String.valueOf(history.get(i).getId()));
+                if (i < history.size() - 1) {
+                    writer.write(",");
+                }
+            }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения данных в файл: " + file.getPath(), e);
         }
@@ -65,78 +69,74 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для загрузки данных из файла
     public static FileBackedTaskManager loadFromFile(File file) {
-        if (file == null)
+        if (file == null) {
             throw new IllegalArgumentException("Файл не может быть null");
-            
+        }
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
-        
         if (!file.exists()) {
             return manager;
         }
-        
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            Optional.ofNullable(reader.readLine())
-                .filter(header -> !header.isEmpty())
-                .ifPresent(header -> {
-                    List<Task> tasks = manager.readTasks(reader);
-                    manager.createTasks(tasks);
-                    manager.readHistory(reader);
-                });
+            String header = reader.readLine();
+            if (header == null || header.isEmpty()) {
+                return manager;
+            }
+            List<Task> tasks = manager.readTasks(reader);
+            manager.createTasks(tasks);
+            manager.readHistory(reader);
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка загрузки данных из файла: " + file.getPath(), e);
         }
-        
         return manager;
     }
 
     // Метод для чтения задач из файла
-    private List<Task> readTasks(BufferedReader reader) {
-        try {
-            return reader.lines()
-                    .takeWhile(line -> !line.isBlank())
-                    .map(FileBackedTaskManager::fromString)
-                    .collect(Collectors.toList());
-        } catch (UncheckedIOException e) {
-            throw new ManagerSaveException("Ошибка при чтении задач из файла", e);
+    private List<Task> readTasks(BufferedReader reader) throws IOException {
+        List<Task> tasks = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
+            tasks.add(fromString(line));
         }
+        return tasks;
     }
 
     // Метод для создания задач
     private void createTasks(List<Task> tasks) {
-        // Сначала создаем эпики и обычные задачи
-        tasks.stream()
-                .filter(task -> !(task instanceof Subtask))
-                .forEach(task -> {
-                    if (task instanceof Epic) {
-                        createEpic((Epic) task);
-                    } else {
-                        createTask(task);
-                    }
-                });
-
-        // Затем создаем подзадачи
-        tasks.stream()
-                .filter(task -> task instanceof Subtask)
-                .map(task -> (Subtask) task)
-                .forEach(this::createSubtask);
+        for (Task task : tasks) {
+            if (task instanceof Epic) {
+                createEpic((Epic) task);
+            } else if (!(task instanceof Subtask)) {
+                createTask(task);
+            }
+        }
+        for (Task task : tasks) {
+            if (task instanceof Subtask) {
+                createSubtask((Subtask) task);
+            }
+        }
     }
 
     // Метод для чтения истории
-    private void readHistory(BufferedReader reader) {
-        try {
-            reader.lines()
-                    .dropWhile(line -> !line.equals("History"))
-                    .skip(1)
-                    .findFirst()
-                    .filter(line -> !line.isEmpty())
-                    .map(line -> line.split(","))
-                    .ifPresent(taskIds -> Arrays.stream(taskIds)
-                            .map(Integer::parseInt)
-                            .map(this::getTaskById)
-                            .filter(Objects::nonNull)
-                            .forEach(history::add));
-        } catch (UncheckedIOException e) {
-            throw new ManagerSaveException("Ошибка при чтении истории из файла", e);
+    private void readHistory(BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.equals("History")) {
+                String historyLine = reader.readLine();
+                if (historyLine != null && !historyLine.isEmpty()) {
+                    String[] taskIds = historyLine.split(",");
+                    for (String taskId : taskIds) {
+                        int id = Integer.parseInt(taskId);
+                        Task task = getTaskById(id);
+                        if (task == null) {
+                            task = getEpicById(id);
+                            if (task == null) {
+                                task = getSubtaskById(id);
+                            }
+                        }
+                    }
+                }
+                break;
+            }
         }
     }
 
@@ -150,10 +150,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TaskType type = TaskType.valueOf(parts[1]);
         switch (type) {
             case TASK:
-                Task task = new Task(parts[2], parts[4]);
-                task.setId(id);
-                task.setStatus(TaskStatus.valueOf(parts[3]));
-                return task;
+                task = new Task(name, description, duration, startTime);
+                break;
+            case EPIC:
+                task = new Epic(name, description);
+                break;
             case SUBTASK:
                 Subtask subtask = new Subtask(parts[2], parts[4], 
                         Integer.parseInt(parts[5]));
