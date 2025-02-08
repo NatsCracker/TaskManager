@@ -66,4 +66,10 @@ public interface TaskManager {
 
     // Метод для получения истории просмотров задач
     List<Task> getHistory();
+
+    // Метод для обновления статуса эпика
+    void updateEpicStatus(Epic epic);
+
+    // Метод для получения списка задач в порядке приоритета
+    List<Task> getPrioritizedTasks();
 }

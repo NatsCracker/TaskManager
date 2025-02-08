@@ -3,15 +3,19 @@ package service;
 import main.model.Epic;
 import main.model.Subtask;
 import main.model.Task;
+import main.model.TaskStatus;
 import main.service.HistoryManager;
 import main.service.TaskManager;
 import main.util.Managers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import main.service.FileBackedTaskManager;
+import main.exception.TaskTimeIntersectionException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +25,8 @@ public class TaskManagerTest {
     // Тест 1: Проверяет, что два объекта main.java.model.Task считаются равными, если у них одинаковый ID
     @Test
     void testTaskEqualityById() {
-        Task task1 = new Task("Задача 1", "Описание 1");
-        Task task2 = new Task("Задача 2", "Описание 2");
+        Task task1 = new Task("Задача 1", "Описание 1", Duration.ofMinutes(30), LocalDateTime.now());
+        Task task2 = new Task("Задача 2", "Описание 2", Duration.ofMinutes(30), LocalDateTime.now());
         task1.setId(1);
         task2.setId(1);
         assertEquals(task1, task2, "Задачи с одинаковыми ID должны быть равны");
@@ -38,8 +42,8 @@ public class TaskManagerTest {
         epic2.setId(1);
         assertEquals(epic1, epic2, "Эпики с одинаковыми ID должны быть равны");
 
-        Subtask subtask1 = new Subtask("Подзадача 1", "Описание подзадачи 1", 1);
-        Subtask subtask2 = new Subtask("Подзадача 2", "Описание подзадачи 2", 1);
+        Subtask subtask1 = new Subtask("Подзадача 1", "Описание подзадачи 1", 1, Duration.ofMinutes(30), LocalDateTime.now());
+        Subtask subtask2 = new Subtask("Подзадача 2", "Описание подзадачи 2", 1, Duration.ofMinutes(30), LocalDateTime.now());
         subtask1.setId(2);
         subtask2.setId(2);
         assertEquals(subtask1, subtask2, "Подзадачи с одинаковыми ID должны быть равны");
@@ -49,10 +53,10 @@ public class TaskManagerTest {
     @Test
     void testEpicCannotAddItselfAsSubtask() {
         TaskManager manager = Managers.getDefault();
-        Epic epic = new Epic("Эпик задача", "Описание эпика");
+        Epic epic = new Epic("Эпик", "Описание");
         manager.createEpic(epic);
 
-        Subtask invalidSubtask = new Subtask("Подзадача", "Описание", epic.getId());
+        Subtask invalidSubtask = new Subtask("Подзадача", "Описание", epic.getId(), Duration.ofMinutes(30), LocalDateTime.now());
         invalidSubtask.setId(epic.getId());
 
         manager.createSubtask(invalidSubtask);
@@ -69,10 +73,10 @@ public class TaskManagerTest {
     @Test
     void testSubtaskCannotBeItsOwnEpic() {
         TaskManager manager = Managers.getDefault();
-        Epic epic = new Epic("Эпик", "Описание эпика");
+        Epic epic = new Epic("Эпик", "Описание");
         epic.setId(1);
         manager.createEpic(epic);
-        Subtask subtask = new Subtask("Подзадача", "Описание", 1);
+        Subtask subtask = new Subtask("Подзадача", "Описание", 1, Duration.ofMinutes(30), LocalDateTime.now());
         manager.createSubtask(subtask);
         assertNotEquals(subtask.getId(), epic.getId(), "Подзадача не может быть своим собственным эпиком");
     }
@@ -97,36 +101,55 @@ public class TaskManagerTest {
     @Test
     void testInMemoryTaskManagerAddAndFindTasks() {
         TaskManager manager = Managers.getDefault();
-        Task task = new Task("Задача", "Описание");
-        Epic epic = new Epic("Эпик", "Описание эпика");
-        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 2);
-
+        LocalDateTime now = LocalDateTime.now();
+        
+        Task task = new Task("Задача", "Описание", 
+            Duration.ofMinutes(30), now);                    // начинается сейчас
+            
+        Epic epic = new Epic("Эпик", "Описание эпика");     // у эпика нет собственного времени
+        
         manager.createTask(task);
         manager.createEpic(epic);
+        
+        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 
+            epic.getId(), Duration.ofMinutes(30), 
+            now.plusHours(1));                              // начинается через час после task
+        
         manager.createSubtask(subtask);
 
-        assertEquals(task, manager.getTaskById(1), "Задача должна быть найдена по ID после добавления");
-        assertEquals(epic, manager.getEpicById(2), "Эпик должен быть найден по ID после добавления");
-        assertEquals(subtask, manager.getSubtaskById(3), "Подзадача должна быть найдена по ID после добавления");
+        assertEquals(task, manager.getTaskById(task.getId()), 
+            "Задача должна быть найдена по ID после добавления");
+        assertEquals(epic, manager.getEpicById(epic.getId()), 
+            "Эпик должен быть найден по ID после добавления");
+        assertEquals(subtask, manager.getSubtaskById(subtask.getId()), 
+            "Подзадача должна быть найдена по ID после добавления");
     }
 
     // Тест 8: Проверяет, что задачи с назначенными и сгенерированными ID не конфликтуют в менеджере
     @Test
     void testNoConflictBetweenGeneratedAndAssignedIds() {
         TaskManager manager = Managers.getDefault();
-        Task task1 = new Task("Задача 1", "Описание 1");
-        Task task2 = new Task("Задача 2", "Описание 2");
+        LocalDateTime now = LocalDateTime.now();
+        
+        Task task1 = new Task("Задача 1", "Описание 1", 
+            Duration.ofMinutes(30), now);                    // начинается сейчас
+            
+        Task task2 = new Task("Задача 2", "Описание 2", 
+            Duration.ofMinutes(30), now.plusHours(1));      // начинается через час
+            
         task1.setId(1);
         manager.createTask(task1);
         manager.createTask(task2);
-        assertNotEquals(task1.getId(), task2.getId(), "Назначенные и сгенерированные ID не должны конфликтовать");
+        
+        assertNotEquals(task1.getId(), task2.getId(), 
+            "Назначенные и сгенерированные ID не должны конфликтовать");
     }
 
     // Тест 9: Проверяет, что задача не изменяется при добавлении в менеджер (по всем полям)
     @Test
     void testTaskImmutabilityOnAddingToManager() {
         TaskManager manager = Managers.getDefault();
-        Task task = new Task("Неизменяемая задача", "Описание");
+        Task task = new Task("Неизменяемая задача", "Описание", Duration.ofMinutes(30), LocalDateTime.now());
         task.setId(1);
         manager.createTask(task);
         Task retrievedTask = manager.getTaskById(1);
@@ -138,10 +161,10 @@ public class TaskManagerTest {
     @Test
     void testHistoryManagerPreservesTaskVersions() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task task = new Task("Задача для истории", "Описание");
+        Task task = new Task("Задача для истории", "Описание", Duration.ofMinutes(30), LocalDateTime.now());
         task.setId(1);
         historyManager.add(task);
-        Task updatedTask = new Task("Обновленная задача", "Обновленное описание");
+        Task updatedTask = new Task("Обновленная задача", "Обновленное описание", Duration.ofMinutes(30), LocalDateTime.now());
         updatedTask.setId(1);
         historyManager.add(updatedTask);
         assertEquals(1, historyManager.getHistory().size(), "main.java.service.HistoryManager " +
@@ -153,7 +176,7 @@ public class TaskManagerTest {
     void testDeleteAllSubtasks() {
         TaskManager manager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Описание");
-        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 1);
+        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 1, Duration.ofMinutes(30), LocalDateTime.now());
 
         manager.createEpic(epic);
         manager.createSubtask(subtask);
@@ -167,7 +190,7 @@ public class TaskManagerTest {
     // Тест 12: Проверяет что main.java.service.HistoryManager корректно удаляет из истории просмотра при удалении задачи
     void testHistoryManagerDeletesTaskFromHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task task = new Task("Задача для истории", "Описание");
+        Task task = new Task("Задача для истории", "Описание", Duration.ofMinutes(30), LocalDateTime.now());
         task.setId(1);
         historyManager.add(task);
         historyManager.remove(1);
@@ -179,12 +202,135 @@ public class TaskManagerTest {
     // Тест 13: Проверяет, что main.java.service.HistoryManager getHistory возвращает список
     void testGetHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task task = new Task("Задача для истории", "Описание");
+        Task task = new Task("Задача для истории", "Описание", Duration.ofMinutes(30), LocalDateTime.now());
         task.setId(1);
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
         assertEquals(1, history.size(), "main.java.service.HistoryManager " +
                 "должен возвращать список задач из истории просмотра");
+    }
+
+    @Test
+    void shouldCalculateEpicStatusWhenAllSubtasksNew() {
+        TaskManager manager = Managers.getDefault();
+        Epic epic = new Epic("Epic", "Description");
+        manager.createEpic(epic);
+        
+        Subtask subtask1 = new Subtask("Sub1", "Desc1", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now());
+        Subtask subtask2 = new Subtask("Sub2", "Desc2", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now().plusHours(1));
+            
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+        
+        assertEquals(TaskStatus.NEW, epic.getStatus());
+    }
+
+    @Test
+    void shouldCalculateEpicStatusWhenAllSubtasksDone() {
+        TaskManager manager = Managers.getDefault();
+        Epic epic = new Epic("Epic", "Description");
+        manager.createEpic(epic);
+        
+        Subtask subtask1 = new Subtask("Sub1", "Desc1", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now());
+        Subtask subtask2 = new Subtask("Sub2", "Desc2", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now().plusHours(1));
+            
+        subtask1.setStatus(TaskStatus.DONE);
+        subtask2.setStatus(TaskStatus.DONE);
+        
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+        
+        assertEquals(TaskStatus.DONE, epic.getStatus());
+    }
+
+    @Test
+    void shouldCalculateEpicStatusWhenMixedSubtasks() {
+        TaskManager manager = Managers.getDefault();
+        Epic epic = new Epic("Epic", "Description");
+        manager.createEpic(epic);
+        
+        Subtask subtask1 = new Subtask("Sub1", "Desc1", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now());
+        Subtask subtask2 = new Subtask("Sub2", "Desc2", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now().plusHours(1));
+            
+        subtask1.setStatus(TaskStatus.DONE);
+        subtask2.setStatus(TaskStatus.NEW);
+        
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+        
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus());
+    }
+
+    @Test
+    void shouldCalculateEpicStatusWhenSubtasksInProgress() {
+        TaskManager manager = Managers.getDefault();
+        Epic epic = new Epic("Epic", "Description");
+        manager.createEpic(epic);
+        
+        Subtask subtask = new Subtask("Sub", "Desc", epic.getId(),
+            Duration.ofMinutes(30), LocalDateTime.now());
+        subtask.setStatus(TaskStatus.IN_PROGRESS);
+        
+        manager.createSubtask(subtask);
+        
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus());
+    }
+
+    @Test
+    void shouldReturnPrioritizedTasks() {
+        TaskManager manager = Managers.getDefault();
+        LocalDateTime now = LocalDateTime.now();
+        
+        Task task1 = new Task("Task1", "Desc1", 
+            Duration.ofHours(1), now.plusHours(4)); // начинается через 4 часа
+            
+        Task task2 = new Task("Task2", "Desc2", 
+            Duration.ofHours(1), now);              // начинается сейчас
+            
+        Task task3 = new Task("Task3", "Desc3", 
+            Duration.ofHours(1), now.plusHours(2)); // начинается через 2 часа
+        
+        manager.createTask(task2); // сначала создаем задачу с самым ранним временем
+        manager.createTask(task3); // потом со средним
+        manager.createTask(task1); // потом с самым поздним
+        
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertEquals(3, prioritized.size());
+        assertEquals(task2, prioritized.get(0)); // самая ранняя
+        assertEquals(task3, prioritized.get(1)); // средняя
+        assertEquals(task1, prioritized.get(2)); // самая поздняя
+    }
+
+    @Test
+    void shouldNotAllowTasksTimeIntersection() {
+        TaskManager manager = Managers.getDefault();
+        Task task1 = new Task("Task1", "Desc1", Duration.ofHours(2), LocalDateTime.now());
+        Task task2 = new Task("Task2", "Desc2", Duration.ofHours(2), LocalDateTime.now().plusHours(1));
+        
+        manager.createTask(task1);
+        
+        assertThrows(TaskTimeIntersectionException.class, () -> 
+            manager.createTask(task2),
+            "Задачи не должны пересекаться по времени"
+        );
+    }
+
+    @Test
+    void shouldValidateSubtaskEpicRelation() {
+        TaskManager manager = Managers.getDefault();
+        Subtask subtask = new Subtask("Sub", "Desc", 999,
+            Duration.ofMinutes(30), LocalDateTime.now());
+            
+        assertThrows(IllegalArgumentException.class, () ->
+            manager.createSubtask(subtask),
+            "Нельзя создать подзадачу без существующего эпика"
+        );
     }
 }
 
@@ -208,7 +354,7 @@ class FileBackedTaskManagerTest {
 
     @Test
     void shouldSaveAndLoadTasksWithHistory() {
-        Task task = new Task("Task", "Description");
+        Task task = new Task("Task", "Description", Duration.ofMinutes(30), LocalDateTime.now());
         Epic epic = new Epic("Epic", "Description");
         manager.createTask(task);
         manager.createEpic(epic);
