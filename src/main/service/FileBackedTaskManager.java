@@ -5,6 +5,7 @@ import main.model.Subtask;
 import main.model.Task;
 import main.model.TaskStatus;
 import main.model.TaskType;
+import main.util.ManagerSaveException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,10 +15,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+<<<<<<< HEAD
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import main.model.Status;
+=======
+>>>>>>> bb10cba (V3.7)
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -152,9 +156,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case TASK:
                 task = new Task(name, description, duration, startTime);
                 break;
+<<<<<<< HEAD
             case EPIC:
                 task = new Epic(name, description);
                 break;
+=======
+>>>>>>> bb10cba (V3.7)
             case SUBTASK:
                 Subtask subtask = new Subtask(parts[2], parts[4], 
                         Integer.parseInt(parts[5]));
