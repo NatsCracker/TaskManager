@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Objects;
+import java.util.Comparator;
+import java.time.Duration;
 
 public class InMemoryTaskManager implements TaskManager {
     private int taskIdCounter = 1;
@@ -56,15 +58,12 @@ public class InMemoryTaskManager implements TaskManager {
         if (!epics.containsKey(subtask.getEpicId())) {
             throw new IllegalArgumentException("Нельзя создать подзадачу без существующего эпика");
         }
-        
         if (subtask.getEpicId() == subtask.getId()) {
             return;
         }
-        
         validateTaskTime(subtask);
         subtask.setId(taskIdCounter++);
         subtasks.put(subtask.getId(), subtask);
-        
         Optional.ofNullable(epics.get(subtask.getEpicId()))
                 .ifPresent(epic -> {
                     epic.addSubtask(subtask.getId());
@@ -131,6 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .ifPresent(this::updateEpicStatus);
                 
         addToPrioritizedTasks(subtask);
+
     }
 
     // Метод обнавления статуса эпика
@@ -310,9 +310,11 @@ public class InMemoryTaskManager implements TaskManager {
             throw new TaskTimeIntersectionException(
                 "Задача пересекается по времени с уже существующей задачей: " + task);
         }
+
     }
 
 }
+
 
 
 
