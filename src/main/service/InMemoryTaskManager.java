@@ -1,25 +1,12 @@
 package main.service;
 
-import main.model.Epic;
-import main.model.Subtask;
-import main.model.Task;
-import main.model.TaskStatus;
-import main.util.Managers;
-import main.model.TaskStartTimeComparator;
 import main.exception.TaskTimeIntersectionException;
+import main.model.*;
+import main.util.Managers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.Objects;
-import java.util.Comparator;
-import java.time.Duration;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     private int taskIdCounter = 1;
@@ -69,7 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
                     epic.addSubtask(subtask.getId());
                     updateEpicStatus(epic);
                 });
-                
+
         addToPrioritizedTasks(subtask);
     }
 
@@ -112,7 +99,7 @@ public class InMemoryTaskManager implements TaskManager {
         validateTaskTime(task);
         Optional.ofNullable(tasks.get(task.getId()))
                 .ifPresent(this::removeFromPrioritizedTasks);
-                
+
         tasks.put(task.getId(), task);
         addToPrioritizedTasks(task);
     }
@@ -123,12 +110,12 @@ public class InMemoryTaskManager implements TaskManager {
         validateTaskTime(subtask);
         Optional.ofNullable(subtasks.get(subtask.getId()))
                 .ifPresent(this::removeFromPrioritizedTasks);
-                
+
         subtasks.put(subtask.getId(), subtask);
-        
+
         Optional.ofNullable(epics.get(subtask.getEpicId()))
                 .ifPresent(this::updateEpicStatus);
-                
+
         addToPrioritizedTasks(subtask);
 
     }
@@ -163,7 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTaskById(int id) {
         Optional.ofNullable(tasks.get(id))
                 .ifPresent(this::removeFromPrioritizedTasks);
-                
+
         tasks.remove(id);
         history.remove(id);
     }
@@ -176,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
                     subtasks.remove(subtaskId);
                     history.remove(subtaskId);
                 }));
-                
+
         history.remove(id);
     }
 
@@ -291,24 +278,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void validateTaskTime(Task task) {
         if (task.getStartTime() == null) return;
-        
+
         boolean hasIntersection = getPrioritizedTasks().stream()
                 .filter(existingTask -> !existingTask.equals(task))
                 .anyMatch(existingTask -> {
                     if (existingTask.getStartTime() == null) return false;
-                    
+
                     LocalDateTime newTaskStart = task.getStartTime();
                     LocalDateTime newTaskEnd = task.getEndTime();
                     LocalDateTime existingTaskStart = existingTask.getStartTime();
                     LocalDateTime existingTaskEnd = existingTask.getEndTime();
-                    
-                    return !(newTaskEnd.isBefore(existingTaskStart) || 
+
+                    return !(newTaskEnd.isBefore(existingTaskStart) ||
                             newTaskStart.isAfter(existingTaskEnd));
                 });
-                
+
         if (hasIntersection) {
             throw new TaskTimeIntersectionException(
-                "Задача пересекается по времени с уже существующей задачей: " + task);
+                    "Задача пересекается по времени с уже существующей задачей: " + task);
         }
 
     }
