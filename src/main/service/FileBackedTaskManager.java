@@ -15,13 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import main.model.Status;
-=======
->>>>>>> bb10cba (V3.7)
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
