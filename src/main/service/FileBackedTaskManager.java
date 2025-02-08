@@ -142,6 +142,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для преобразования из строки в задачу
     private static Task fromString(String value) {
+<<<<<<< HEAD
         String[] parts = value.split(",");
         int id = Integer.parseInt(parts[0]);
         TaskType type = TaskType.valueOf(parts[1]);
@@ -152,23 +153,45 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         LocalDateTime startTime = parts[6].isEmpty() ? null : LocalDateTime.parse(parts[6]);
 
         Task task;
+=======
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        String[] parts = value.split(",");
+        int id = Integer.parseInt(parts[0]);
+        TaskType type = TaskType.valueOf(parts[1]);
+>>>>>>> 1cac1a9 (V3.7)
         switch (type) {
             case TASK:
-                task = new Task(name, description, duration, startTime);
-                break;
-            case EPIC:
-                task = new Epic(name, description);
-                break;
+                Task task = new Task(parts[2], parts[4]);
+                task.setId(id);
+                task.setStatus(TaskStatus.valueOf(parts[3]));
+                return task;
             case SUBTASK:
+<<<<<<< HEAD
                 int epicId = Integer.parseInt(parts[7]);
                 task = new Subtask(name, description, epicId, duration, startTime);
                 break;
             default:
                 throw new IllegalArgumentException("Неизвестный тип задачи");
+=======
+                Subtask subtask = new Subtask(parts[2], parts[4], 
+                        Integer.parseInt(parts[5]));
+                subtask.setId(id);
+                subtask.setStatus(TaskStatus.valueOf(parts[3]));
+                return subtask;
+>>>>>>> 1cac1a9 (V3.7)
         }
-        task.setId(id);
-        task.setStatus(status);
-        return task;
+        if (file == null) {
+            throw new IllegalArgumentException("Файл не может быть null");
+        }
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        
+        if (!file.exists()) {
+            return manager;
+        }
+        
+        return null; // Placeholder return, actual implementation needed
     }
 
     // Метод для создания задачи
