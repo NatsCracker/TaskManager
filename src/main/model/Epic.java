@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-    private final List<Integer> subtasks;
+    private final List<Integer> subtasksId;
     private LocalDateTime endTime;
 
     public Epic(String name, String description) {
         super(name, description, Duration.ZERO, null);
         this.type = TaskType.EPIC;
-        this.subtasks = new ArrayList<>();
+        this.subtasksId = new ArrayList<>();
     }
 
     //  Геттер id
