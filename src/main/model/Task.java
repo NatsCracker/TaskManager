@@ -97,10 +97,8 @@ public class Task {
         if (this.startTime == null || other.startTime == null) {
             return false;
         }
-        
         LocalDateTime thisEnd = this.getEndTime();
         LocalDateTime otherEnd = other.getEndTime();
-        
         return !this.startTime.isAfter(otherEnd) && !thisEnd.isBefore(other.startTime);
     }
 
