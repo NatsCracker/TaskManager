@@ -123,8 +123,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для преобразования из строки в задачу
     private static Task fromString(String value) {
-        String[] fields = value.split(",");
-        if (fields.length < 8) {
+        // Используем split с лимитом -1, чтобы сохранить пустые поля
+        String[] fields = value.split(",", -1);
+        if (fields.length == 7) {
+            // Если строка содержит 7 полей, добавляем недостающее поле (duration) со значением "null"
+            String[] temp = new String[8];
+            System.arraycopy(fields, 0, temp, 0, 7);
+            temp[7] = "null";
+            fields = temp;
+        } else if (fields.length != 8) {
             throw new IllegalArgumentException("Некорректная строка CSV: " + value);
         }
 
@@ -134,8 +141,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TaskStatus status = TaskStatus.valueOf(fields[3]);
         String description = fields[4];
         String epicId = fields[5];
-        LocalDateTime startTime = "null".equals(fields[6]) ? null : LocalDateTime.parse(fields[6]);
-        Duration duration = "null".equals(fields[7]) ? null : Duration.parse(fields[7]);
+        // Если поле пустое или равно "null", присваиваем null
+        LocalDateTime startTime = ("null".equals(fields[6]) || fields[6].isEmpty())
+                ? null
+                : LocalDateTime.parse(fields[6]);
+        Duration duration = ("null".equals(fields[7]) || fields[7].isEmpty())
+                ? null
+                : Duration.parse(fields[7]);
 
         Task task;
         switch (type) {
@@ -156,6 +168,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         task.setStatus(status);
         return task;
     }
+
+
 
     // Метод для создания задачи
     @Override
