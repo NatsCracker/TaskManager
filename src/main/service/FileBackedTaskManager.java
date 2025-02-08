@@ -124,7 +124,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // Метод для преобразования из строки в задачу
     private static Task fromString(String value) {
         String[] fields = value.split(",");
-        if (fields.length < 7) {
+        if (fields.length < 8) {
             throw new IllegalArgumentException("Некорректная строка CSV: " + value);
         }
 
@@ -133,19 +133,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = fields[2];
         TaskStatus status = TaskStatus.valueOf(fields[3]);
         String description = fields[4];
-        LocalDateTime startTime = fields[6].equals("null") ? null : LocalDateTime.parse(fields[6]);
-        Duration duration = fields[7].equals("null") ? null : Duration.parse(fields[7]);
+        String epicId = fields[5];
+        LocalDateTime startTime = "null".equals(fields[6]) ? null : LocalDateTime.parse(fields[6]);
+        Duration duration = "null".equals(fields[7]) ? null : Duration.parse(fields[7]);
 
         Task task;
-        if (type == TaskType.TASK) {
-            task = new Task(name, description, duration, startTime);
-        } else if (type == TaskType.EPIC) {
-            task = new Epic(name, description);
-        } else if (type == TaskType.SUBTASK) {
-            int epicId = Integer.parseInt(fields[5]);
-            task = new Subtask(name, description, epicId, duration, startTime);
-        } else {
-            throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
+        switch (type) {
+            case TASK:
+                task = new Task(name, description, duration, startTime);
+                break;
+            case EPIC:
+                task = new Epic(name, description);
+                break;
+            case SUBTASK:
+                task = new Subtask(name, description, Integer.parseInt(epicId), duration, startTime);
+                break;
+            default:
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
 
         task.setId(id);
