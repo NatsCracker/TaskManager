@@ -2,12 +2,16 @@ package main;
 
 import main.model.Epic;
 import main.model.Subtask;
+import main.model.Task;
 import main.service.TaskManager;
 import main.util.Managers;
+
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
+        ArrayList<Task> tasks = new ArrayList<>();
 
         Epic epic = new Epic("Epic 1", "Description 1");
         Epic epic2 = new Epic("Epic 2", "Description 2");
@@ -24,6 +28,7 @@ public class Main {
         manager.getSubtaskById(subtask.getId());
         manager.getEpicById(epic2.getId());
         manager.getSubtaskById(subtask2.getId());
+        tasks.add(manager.getTaskById(5));
 
         System.out.println(manager.getHistory());
 

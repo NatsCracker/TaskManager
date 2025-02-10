@@ -7,7 +7,11 @@ import main.service.HistoryManager;
 import main.service.TaskManager;
 import main.util.Managers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import main.service.FileBackedTaskManager;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -181,5 +185,38 @@ public class TaskManagerTest {
         List<Task> history = historyManager.getHistory();
         assertEquals(1, history.size(), "main.java.service.HistoryManager " +
                 "должен возвращать список задач из истории просмотра");
+    }
+}
+
+class FileBackedTaskManagerTest {
+    private File tempFile;
+    private FileBackedTaskManager manager;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        tempFile = File.createTempFile("tasks", ".csv");
+        manager = new FileBackedTaskManager(tempFile);
+    }
+
+    @Test
+    void shouldSaveAndLoadEmptyTaskManager() {
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
+        assertEquals(0, loadedManager.getAllTasks().size());
+        assertEquals(0, loadedManager.getAllEpics().size());
+        assertEquals(0, loadedManager.getAllSubtasks().size());
+    }
+
+    @Test
+    void shouldSaveAndLoadTasksWithHistory() {
+        Task task = new Task("Task", "Description");
+        Epic epic = new Epic("Epic", "Description");
+        manager.createTask(task);
+        manager.createEpic(epic);
+        
+        manager.getTaskById(task.getId()); // добавляем в историю
+        
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
+        assertEquals(1, loadedManager.getAllTasks().size());
+        assertEquals(1, loadedManager.getAllEpics().size());
     }
 }
