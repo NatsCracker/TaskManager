@@ -42,36 +42,9 @@ public class Epic extends Task {
         subtasksId.clear();
     }
 
-    public void updateTimeAndDuration(List<Subtask> subtasks) {
-        if (subtasks.isEmpty()) {
-            setStartTime(null);
-            setDuration(Duration.ZERO);
-            this.endTime = null;
-            return;
-        }
-
-        LocalDateTime earliestStart = null;
-        LocalDateTime latestEnd = null;
-        Duration totalDuration = Duration.ZERO;
-
-        for (Subtask subtask : subtasks) {
-            if (subtask.getStartTime() != null) {
-                if (earliestStart == null || subtask.getStartTime().isBefore(earliestStart)) {
-                    earliestStart = subtask.getStartTime();
-                }
-                LocalDateTime subtaskEnd = subtask.getEndTime();
-                if (latestEnd == null || subtaskEnd.isAfter(latestEnd)) {
-                    latestEnd = subtaskEnd;
-                }
-            }
-            if (subtask.getDuration() != null) {
-                totalDuration = totalDuration.plus(subtask.getDuration());
-            }
-        }
-
-        setStartTime(earliestStart);
-        setDuration(totalDuration);
-        this.endTime = latestEnd;
+    // Метод для изменения времени завершения
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     // Геттер времени завершения эпика
@@ -82,13 +55,6 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,%d,%s",
-            getId(),
-            getType(),
-            getName(),
-            getStatus(),
-            getDescription(),
-            getDuration() != null ? getDuration().toMinutes() : 0,
-            getStartTime() != null ? getStartTime() : "");
+        return String.format("%d,%s,%s,%s,%s,%d,%s", getId(), getType(), getName(), getStatus(), getDescription(), getDuration() != null ? getDuration().toMinutes() : 0, getStartTime() != null ? getStartTime() : "");
     }
 }

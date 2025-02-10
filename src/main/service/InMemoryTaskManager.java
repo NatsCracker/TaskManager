@@ -4,6 +4,7 @@ import main.exception.TaskTimeIntersectionException;
 import main.model.*;
 import main.util.Managers;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -298,6 +299,40 @@ public class InMemoryTaskManager implements TaskManager {
                     "Задача пересекается по времени с уже существующей задачей: " + task);
         }
 
+    }
+
+    // Метод обновления времени и продолжительности задачи
+    public void updateTimeAndDuration(Epic epic) {
+        if (epic.getSubtasks().isEmpty()) {
+            epic.setStartTime(null);
+            epic.setDuration(Duration.ZERO);
+            epic.setEndTime(null);
+            return;
+        }
+
+        LocalDateTime earliestStart = null;
+        LocalDateTime latestEnd = null;
+        Duration totalDuration = Duration.ZERO;
+
+        for (Integer subtaskId : epic.getSubtasks()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask.getStartTime() != null) {
+                if (earliestStart == null || subtask.getStartTime().isBefore(earliestStart)) {
+                    earliestStart = subtask.getStartTime();
+                }
+                LocalDateTime subtaskEnd = subtask.getEndTime();
+                if (latestEnd == null || subtaskEnd.isAfter(latestEnd)) {
+                    latestEnd = subtaskEnd;
+                }
+            }
+            if (subtask.getDuration() != null) {
+                totalDuration = totalDuration.plus(subtask.getDuration());
+            }
+        }
+
+        epic.setStartTime(earliestStart);
+        epic.setDuration(totalDuration);
+        epic.setEndTime(latestEnd);
     }
 
 }
