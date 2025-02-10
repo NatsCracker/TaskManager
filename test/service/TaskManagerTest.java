@@ -130,7 +130,7 @@ public class TaskManagerTest {
         assertEquals(task.getDescription(), retrievedTask.getDescription(), "Описание задачи должно оставаться неизменным");
     }
 
-    // Тест 10: Проверяет, что main.java.service.HistoryManager сохраняет все версии задачи при добавлении в историю
+    // Тест 10: Проверяет, что main.java.service.HistoryManager сохраняет последнюю версию задачи при добавлении в историю
     @Test
     void testHistoryManagerPreservesTaskVersions() {
         HistoryManager historyManager = Managers.getDefaultHistory();
@@ -140,13 +140,13 @@ public class TaskManagerTest {
         Task updatedTask = new Task("Обновленная задача", "Обновленное описание");
         updatedTask.setId(1);
         historyManager.add(updatedTask);
-        assertEquals(2, historyManager.getHistory().size(), "main.java.service.HistoryManager " +
+        assertEquals(1, historyManager.getHistory().size(), "main.java.service.HistoryManager " +
                 "должен сохранять обе версии задачи");
     }
 
     // Тест 11: Проверяет, что все подзадачи удаляются при удалении всех подзадач
     @Test
-    void testDeleteAllSybtasks() {
+    void testDeleteAllSubtasks() {
         TaskManager manager = Managers.getDefault();
         Epic epic = new Epic("Эпик", "Описание");
         Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", 1);
@@ -158,5 +158,28 @@ public class TaskManagerTest {
         assertEquals(0, epic.getSubtasks().size(), "Эпик должен содержать пустой список подзадач" +
                 " после удаления всех подзадач");
     }
-}
 
+     @Test
+    // Тест 12: Проверяет что main.java.service.HistoryManager корректно удаляет из истории просмотра при удалении задачи
+    void testHistoryManagerDeletesTaskFromHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task task = new Task("Задача для истории", "Описание");
+        task.setId(1);
+        historyManager.add(task);
+        historyManager.remove(1);
+        assertEquals(0, historyManager.getHistory().size(), "main.java.service.HistoryManager " +
+                "должен удалять задачу из истории просмотра при ее удалении");
+    }
+
+    @Test
+    // Тест 13: Проверяет, что main.java.service.HistoryManager getHistory возвращает список
+    void testGetHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task task = new Task("Задача для истории", "Описание");
+        task.setId(1);
+        historyManager.add(task);
+        List<Task> history = historyManager.getHistory();
+        assertEquals(1, history.size(), "main.java.service.HistoryManager " +
+                "должен возвращать список задач из истории просмотра");
+    }
+}
