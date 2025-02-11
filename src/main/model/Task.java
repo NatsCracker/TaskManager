@@ -1,19 +1,25 @@
 package main.model;
 
 import java.util.Objects;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Task {
     protected int id;
     private String name;
     private String description;
     private TaskStatus status;
-    protected TaskType type;  // сделаем protected для доступа из подклассов
+    protected TaskType type;
+    private Duration duration;
+    private LocalDateTime startTime;
 
-    public Task(String name, String description) {
+    public Task(String name, String description, Duration duration, LocalDateTime startTime) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
         this.type = TaskType.TASK;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     // Геттер id задачи
@@ -61,6 +67,41 @@ public class Task {
         return type;
     }
 
+    // Геттер времени даты и времени завершения задачи
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null;
+        }
+        return startTime.plus(duration);
+    }
+
+    // Геттер времени начала задачи
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    // Геттер продолжительности задачи
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public boolean hasTimeIntersection(Task other) {
+        if (this.startTime == null || other.startTime == null) {
+            return false;
+        }
+        LocalDateTime thisEnd = this.getEndTime();
+        LocalDateTime otherEnd = other.getEndTime();
+        return !this.startTime.isAfter(otherEnd) && !thisEnd.isBefore(other.startTime);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,11 +117,13 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s",
+        return String.format("%d,%s,%s,%s,%s,%d,%s",
             id,
-            getType(),
+            type,
             name,
             status,
-            description);
+            description,
+            duration != null ? duration.toMinutes() : 0,
+            startTime != null ? startTime : "");
     }
 }

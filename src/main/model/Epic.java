@@ -1,15 +1,23 @@
 package main.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-    private List<Integer> subtasksId;
+    private final List<Integer> subtasksId;
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
-        super(name, description);
+        super(name, description, Duration.ZERO, null);
         this.type = TaskType.EPIC;
         this.subtasksId = new ArrayList<>();
+    }
+
+    //  Геттер id
+    public int getEpicId() {
+        return id;
     }
 
     // Метод для добавления подзадачи
@@ -34,13 +42,19 @@ public class Epic extends Task {
         subtasksId.clear();
     }
 
+    // Метод для изменения времени завершения
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    // Геттер времени завершения эпика
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s",
-            getId(),
-            getType(),
-            getName(),
-            getStatus(),
-            getDescription());
+        return String.format("%d,%s,%s,%s,%s,%d,%s", getId(), getType(), getName(), getStatus(), getDescription(), getDuration() != null ? getDuration().toMinutes() : 0, getStartTime() != null ? getStartTime() : "");
     }
 }

@@ -1,10 +1,6 @@
 package main.service;
 
-import main.model.Epic;
-import main.model.Subtask;
-import main.model.Task;
-import main.model.TaskStatus;
-import main.model.TaskType;
+import main.model.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +23,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // Метод для сохранения данных в файл
     private void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write("id,type,name,status,description,epic,startTime,duration");
             writer.newLine();
             List<Task> allTasks = new ArrayList<>();
             allTasks.addAll(getAllTasks());
@@ -113,6 +111,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                 task = getSubtaskById(id);
                             }
                         }
+                        if (task != null) {
+                            history.add(task);
+                        }
                     }
                 }
                 break;
@@ -122,8 +123,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для преобразования из строки в задачу
     private static Task fromString(String value) {
-        String[] fields = value.split(",");
-        if (fields.length < 5) {
+        // Используем split с лимитом -1, чтобы сохранить пустые поля
+        String[] fields = value.split(",", -1);
+        if (fields.length == 7) {
+            // Если строка содержит 7 полей, добавляем недостающее поле (duration) со значением "null"
+            String[] temp = new String[8];
+            System.arraycopy(fields, 0, temp, 0, 7);
+            temp[7] = "null";
+            fields = temp;
+        } else if (fields.length != 8) {
             throw new IllegalArgumentException("Некорректная строка CSV: " + value);
         }
 
@@ -132,26 +140,36 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = fields[2];
         TaskStatus status = TaskStatus.valueOf(fields[3]);
         String description = fields[4];
+        String epicId = fields[5];
+        // Если поле пустое или равно "null", присваиваем null
+        LocalDateTime startTime = ("null".equals(fields[6]) || fields[6].isEmpty())
+                ? null
+                : LocalDateTime.parse(fields[6]);
+        Duration duration = ("null".equals(fields[7]) || fields[7].isEmpty())
+                ? null
+                : Duration.parse(fields[7]);
 
         Task task;
-        if (type == TaskType.TASK) {
-            task = new Task(name, description);
-        } else if (type == TaskType.EPIC) {
-            task = new Epic(name, description);
-        } else if (type == TaskType.SUBTASK) {
-            if (fields.length < 6) {
-                throw new IllegalArgumentException("Для Subtask отсутствует epicId: " + value);
-            }
-            int epicId = Integer.parseInt(fields[5]);
-            task = new Subtask(name, description, epicId);
-        } else {
-            throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
+        switch (type) {
+            case TASK:
+                task = new Task(name, description, duration, startTime);
+                break;
+            case EPIC:
+                task = new Epic(name, description);
+                break;
+            case SUBTASK:
+                task = new Subtask(name, description, Integer.parseInt(epicId), duration, startTime);
+                break;
+            default:
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
 
         task.setId(id);
         task.setStatus(status);
         return task;
     }
+
+
 
     // Метод для создания задачи
     @Override
