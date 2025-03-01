@@ -11,6 +11,7 @@ import main.util.GsonConfig;
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings("checkstyle:Regexp")
 public class SubtasksHandler extends BaseHttpHandler {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_JSON = "application/json";

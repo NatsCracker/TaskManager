@@ -9,6 +9,7 @@ import main.util.GsonConfig;
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings("checkstyle:Regexp")
 public class HistoryHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
     private final Gson gson = GsonConfig.getGson();
