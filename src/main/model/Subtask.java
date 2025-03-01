@@ -20,13 +20,13 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%s,%d,%s,%d",
-            getId(),
-            getType(),
-            getName(),
-            getStatus(),
-            getDescription(),
-            getDuration() != null ? getDuration().toMinutes() : 0,
-            getStartTime() != null ? getStartTime() : "",
-            epicId);
+                getId(),
+                getType(),
+                getName(),
+                getStatus(),
+                getDescription(),
+                getDuration() != null ? getDuration().toMinutes() : 0,
+                getStartTime() != null ? getStartTime() : "",
+                epicId);
     }
 }

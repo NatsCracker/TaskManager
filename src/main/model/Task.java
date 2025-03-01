@@ -1,8 +1,8 @@
 package main.model;
 
-import java.util.Objects;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Task {
     protected int id;
@@ -118,12 +118,12 @@ public class Task {
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%s,%d,%s",
-            id,
-            type,
-            name,
-            status,
-            description,
-            duration != null ? duration.toMinutes() : 0,
-            startTime != null ? startTime : "");
+                id,
+                type,
+                name,
+                status,
+                description,
+                duration != null ? duration.toMinutes() : 0,
+                startTime != null ? startTime : "");
     }
 }
